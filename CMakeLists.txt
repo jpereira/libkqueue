@@ -31,6 +31,12 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 11)
 
+#
+# Enable 'close()' wrapper function. Needed to be sure that all allocated
+# memory by kqueue will be released.
+#
+set(ENABLE_WRAPPER_CLOSE TRUE)
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif()
@@ -186,8 +192,17 @@ else()
   set(LIBRARY_TYPE SHARED)
 endif()
 
+if(ENABLE_WRAPPER_CLOSE)
+  add_definitions(-DENABLE_WRAPPER_CLOSE)
+  list(APPEND LIBKQUEUE_SOURCES src/common/wrapper_close.c)
+endif()
+
 add_library(kqueue ${LIBRARY_TYPE} ${LIBKQUEUE_SOURCES} ${LIBKQUEUE_HEADERS})
 set_target_properties(kqueue PROPERTIES SOVERSION 1)
+
+if(ENABLE_WRAPPER_CLOSE)
+  set_target_properties(kqueue PROPERTIES LINK_FLAGS "-Wl,--wrap=close")
+endif()
 
 if(WIN32)
   target_compile_definitions(kqueue PRIVATE _USRDLL;_WINDLL)

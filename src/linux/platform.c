@@ -233,12 +233,14 @@ linux_kqueue_init(struct kqueue *kq)
 
     (void) pthread_mutex_lock(&kq_mtx);
 
+#ifndef ENABLE_WRAPPER_CLOSE
     /* Start monitoring thread during first initialization */
     (void) pthread_once(&monitoring_thread_initialized, linux_kqueue_start_thread);
 
+
     /* Update pipe FD map */
     fd_map[kq->pipefd[0]] = kq->pipefd[1];
-
+#endif
     /* Increment kqueue counter */
     kqueue_cnt++;
 
@@ -298,9 +300,9 @@ linux_kqueue_cleanup(struct kqueue *kq)
         close(pipefd);
         kq->pipefd[0] = -1;
     }
-
+#ifndef ENABLE_WRAPPER_CLOSE
     fd_map[pipefd] = 0;
-
+#endif
     /* Decrement kqueue counter */
     kqueue_cnt--;
 
@@ -310,6 +312,8 @@ linux_kqueue_cleanup(struct kqueue *kq)
 void
 linux_kqueue_free(struct kqueue *kq)
 {
+    if (!fd_cleanup_cnt) return;
+
     /* Increment cleanup counter as cleanup is being performed outside signal handler */
     if (linux_kqueue_cleanup(kq))
         fd_cleanup_cnt[kq->kq_id]++;
