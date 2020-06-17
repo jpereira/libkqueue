@@ -237,6 +237,9 @@ kevent_copyin(struct kqueue *kq, const struct kevent *src, int nchanges,
         if (nevents > 0) {
             memcpy(eventlist, src, sizeof(*src));
             eventlist->data = status;
+
+            if (status != 0) eventlist->flags |= EV_ERROR;
+
             nevents--;
             eventlist++;
             nret++;
