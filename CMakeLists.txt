@@ -248,7 +248,9 @@ set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION ${CMAKE_INSTALL_FULL_MANDIR}
                                                   ${CMAKE_INSTALL_FULL_LIBDIR}${LIB_SUFFIX}/pkgconfig)
 
 install(FILES
-          "include/sys/event.h" "include/sys/libkqueue_version.h"
+          "include/sys/event.h"
+          "include/sys/libkqueue_version.h"
+          "include/sys/libkqueue_debug.h"
         DESTINATION
           "${CMAKE_INSTALL_FULL_INCLUDEDIR}/kqueue/sys"
         COMPONENT headers)

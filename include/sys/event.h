@@ -42,6 +42,7 @@
 # include <stdint.h>
 #endif
 # include <sys/libkqueue_version.h>
+# include <sys/libkqueue_debug.h>
 #define LIBKQUEUE       1
 #endif
 

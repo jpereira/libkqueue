@@ -76,6 +76,16 @@ get_fd_used(void)
 
 static struct map *kqmap;
 
+void VISIBLE
+libkqueue_debug_enable(void) {
+    DEBUG_KQUEUE = 1;
+}
+
+void VISIBLE
+libkqueue_debug_disable(void) {
+    DEBUG_KQUEUE = 0;
+}
+
 void
 libkqueue_init(void)
 {
