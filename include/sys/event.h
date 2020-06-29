@@ -177,9 +177,12 @@ struct kevent {
  *
  * @{
  */
-#define    NOTE_EXIT    0x80000000     //!< Process exited.
-#define    NOTE_FORK    0x40000000     //!< Process forked.
-#define    NOTE_EXEC    0x20000000     //!< Process exec'd.
+#define    NOTE_EXIT        0x80000000     //!< Process exited.
+#define    NOTE_FORK        0x40000000     //!< Process forked.
+#define    NOTE_EXEC        0x20000000     //!< Process exec'd.
+#define    NOTE_EXITSTATUS  0x04000000     //!< Exit status to be returned, valid for child process only
+#define    NOTE_SIGNAL      0x08000000     //!< Shared with EVFILT_SIGNAL */
+
 #define    NOTE_PCTRLMASK 0xf0000000   //!< Mask for hint bits.
 #define    NOTE_PDATAMASK 0x000fffff   //!< Mask for pid.
 /** @} */
