@@ -18,7 +18,6 @@
 
 static int sigusr1_caught = 0;
 static pid_t pid;
-static int kqfd;
 
 static void
 sig_handler(int signum)
@@ -31,28 +30,28 @@ test_kevent_proc_add(struct test_context *ctx)
 {
     struct kevent kev;
 
-    test_no_kevents(kqfd);
-    kevent_add(kqfd, &kev, pid, EVFILT_PROC, EV_ADD, 0, 0, NULL);
-    test_no_kevents(kqfd);
+    test_no_kevents(ctx->kqfd);
+    kevent_add(ctx->kqfd, &kev, pid, EVFILT_PROC, EV_ADD, 0, 0, NULL);
+    test_no_kevents(ctx->kqfd);
 }
 
 static void
-test_kevent_proc_delete(struct test_context *ctx)
+test_kevent_proc_del(struct test_context *ctx)
 {
     struct kevent kev;
 
-    test_no_kevents(kqfd);
-    kevent_add(kqfd, &kev, pid, EVFILT_PROC, EV_DELETE, 0, 0, NULL);
+    test_no_kevents(ctx->kqfd);
+    kevent_add(ctx->kqfd, &kev, pid, EVFILT_PROC, EV_DELETE, 0, 0, NULL);
     if (kill(pid, SIGKILL) < 0)
         die("kill");
     sleep(1);
-    test_no_kevents(kqfd);
+    test_no_kevents(ctx->kqfd);
 }
 
 static void
 test_kevent_proc_get(struct test_context *ctx)
 {
-    struct kevent kev, buf;
+    struct kevent kev, ret;
 
     /* Create a child that waits to be killed and then exits */
     pid = fork();
@@ -63,16 +62,16 @@ test_kevent_proc_get(struct test_context *ctx)
     }
     printf(" -- child created (pid %d)\n", (int) pid);
 
-    test_no_kevents(kqfd);
-    kevent_add(kqfd, &kev, pid, EVFILT_PROC, EV_ADD, 0, 0, NULL);
+    test_no_kevents(ctx->kqfd);
+    kevent_add(ctx->kqfd, &kev, pid, EVFILT_PROC, EV_ADD, 0, 0, NULL);
 
     /* Cause the child to exit, then retrieve the event */
     printf(" -- killing process %d\n", (int) pid);
     if (kill(pid, SIGUSR1) < 0)
         die("kill");
-    kevent_get(&buf, kqfd);
-    kevent_cmp(&kev, &buf);
-    test_no_kevents(kqfd);
+    kevent_get(&ret, ctx->kqfd);
+    kevent_cmp(&kev, &ret);
+    test_no_kevents(ctx->kqfd);
 }
 
 #ifdef TODO
@@ -213,7 +212,7 @@ test_evfilt_proc(struct test_context *ctx)
     printf(" -- child created (pid %d)\n", (int) pid);
 
     test(kevent_proc_add, ctx);
-    test(kevent_proc_delete, ctx);
+    test(kevent_proc_del, ctx);
     test(kevent_proc_get, ctx);
 
     signal(SIGUSR1, SIG_DFL);
