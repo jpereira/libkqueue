@@ -324,7 +324,7 @@ usage(void)
     printf("usage: [-hn] [testclass ...]\n"
            " -h        This message\n"
            " -n        Number of iterations (default: 1)\n"
-           " testclass Tests suites to run: [socket signal timer vnode user]\n"
+           " testclass Tests suites to run: [socket signal proc timer vnode user]\n"
            "           All tests are run by default\n"
            "\n"
           );
@@ -340,9 +340,7 @@ main(int argc, char **argv)
         // XXX-FIXME -- BROKEN ON LINUX WHEN RUN IN A SEPARATE THREAD
         { "signal", 1, test_evfilt_signal },
 #endif
-#if FIXME
         { "proc", 1, test_evfilt_proc },
-#endif
         { "timer", 1, test_evfilt_timer },
 #ifndef _WIN32
         { "vnode", 1, test_evfilt_vnode },
