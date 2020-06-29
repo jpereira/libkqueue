@@ -76,8 +76,10 @@ kevent_fflags_dump(const struct kevent *kev)
 
     case EVFILT_PROC:
         KEVFFL_DUMP(NOTE_EXIT);
+        KEVFFL_DUMP(NOTE_EXITSTATUS);
         KEVFFL_DUMP(NOTE_FORK);
         KEVFFL_DUMP(NOTE_EXEC);
+        KEVFFL_DUMP(NOTE_SIGNAL);
         break;
 
     default:
