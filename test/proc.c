@@ -31,13 +31,13 @@ test_kevent_proc_add(struct test_context *ctx)
 {
     struct kevent kev;
 
-    test_no_kevents(kqfd);
+    // test_no_kevents(kqfd);
     kevent_add(kqfd, &kev, pid, EVFILT_PROC, EV_ADD, 0, 0, NULL);
     test_no_kevents(kqfd);
 }
 
 static void
-test_kevent_proc_delete(struct test_context *ctx)
+test_kevent_proc_del(struct test_context *ctx)
 {
     struct kevent kev;
 
@@ -213,7 +213,7 @@ test_evfilt_proc(struct test_context *ctx)
     printf(" -- child created (pid %d)\n", (int) pid);
 
     test(kevent_proc_add, ctx);
-    test(kevent_proc_delete, ctx);
+    test(kevent_proc_del, ctx);
     test(kevent_proc_get, ctx);
 
     signal(SIGUSR1, SIG_DFL);

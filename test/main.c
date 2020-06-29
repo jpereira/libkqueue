@@ -285,7 +285,7 @@ test_harness(struct unit_test tests[MAX_TESTS], int iterations)
     test(cleanup, ctx);
 #endif
 
-    test(ev_receipt, ctx);
+    //test(ev_receipt, ctx);
     /* TODO: this fails now, but would be good later
     test(kqueue_descriptor_is_pollable);
     */
@@ -333,9 +333,7 @@ main(int argc, char **argv)
         // XXX-FIXME -- BROKEN ON LINUX WHEN RUN IN A SEPARATE THREAD
         { "signal", 1, test_evfilt_signal },
 #endif
-#if FIXME
         { "proc", 1, test_evfilt_proc },
-#endif
         { "timer", 1, test_evfilt_timer },
 #ifndef _WIN32
         { "vnode", 1, test_evfilt_vnode },
