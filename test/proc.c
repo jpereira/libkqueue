@@ -16,6 +16,22 @@
 
 #include "common.h"
 
+/**
+ * The "NOTE_TRACK" support was properly deprecated on OSX > 10.5
+ * as can be seen in:
+ *
+ * http://www.openradar.appspot.com/7129001
+ * http://newosxbook.com/src.jl?tree=xnu&file=/bsd/sys/event.h
+ * CVE-ID: CVE-2006-6127
+ *  ~> https://lists.apple.com/archives/security-announce/2007/Nov/msg00002.html
+ */
+#ifdef __APPLE__
+#  include <AvailabilityMacros.h>
+#  if (MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5)
+#    define OSX_DEPRECATED_NOTE_TRACK
+#  endif
+#endif
+
 static int sigusr1_caught = 0;
 static int sleep_time = 0;
 
@@ -405,6 +421,7 @@ test_kevent_proc_track(struct test_context *ctx)
         }
     }
 }
+#endif
 
 #ifdef TODO
 void
