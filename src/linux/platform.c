@@ -528,7 +528,7 @@ linux_kevent_wait(struct kqueue *kq, int nevents, const struct timespec *ts)
             timeout = (1000 * ts->tv_sec) + (ts->tv_nsec / 1000000);
     }
 
-    dbg_puts("waiting for events");
+    dbg_printf("waiting %dms for events fd=%d", timeout, kqueue_epoll_fd(kq));
     nret = epoll_wait(kqueue_epoll_fd(kq), epoll_events, nevents, timeout);
     if (nret < 0) {
         dbg_perror("epoll_wait");
