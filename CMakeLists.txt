@@ -182,6 +182,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
        src/linux/timer.c
        src/linux/user.c
        src/linux/vnode.c
+       src/linux/proc.c
        src/linux/write.c)
 else()
   message(FATAL_ERROR "unsupported host os")
