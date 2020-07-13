@@ -1,6 +1,9 @@
 Unreleased
 ------------------------------------------------------------------------
 
+  * Add EVFILT_PROC support for Linux
+    Author: Jorge Pereira <jpereira@freeradius.org>
+
   * Install event.h in $INCLUDEDIR/kqueue/sys, rather than $INCLUDEDIR/sys
 
   * Add support for building native Debian packages using Docker
