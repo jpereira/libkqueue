@@ -79,6 +79,124 @@ test_kevent_proc_add_and_delete(struct test_context *ctx)
 }
 
 static void
+test_kevent_proc_note_exit_exitstatus(struct test_context *ctx)
+{
+    char test_id[128];
+    struct kevent kev;
+    pid_t pid;
+    int pipe_fd[2];
+    int total_childs = 5, i = 0;
+    ssize_t result;
+
+    test_no_kevents(ctx->kqfd);
+
+    if (pipe(pipe_fd)) {
+        errx(1, "pipe (parent) failed! (%s() at %s:%d)",
+            __func__, __FILE__, __LINE__);
+    }
+
+    test_no_kevents(ctx->kqfd);
+    for (i=0; i < total_childs; i++) {
+        /* Create a child to track. */
+        pid = fork();
+
+        if (pid == 0) { /* Child */
+            int exit_code = 66 + i;
+            /*
+             * Give the parent a chance to start tracking us.
+             */
+            result = read(pipe_fd[0], test_id, 1);
+            if (result != 1) {
+                errx(1, "read from pipe in child failed! (ret %zd) (%s() at %s:%d)",
+                    result, __func__, __FILE__, __LINE__);
+            }
+
+            sleep_time += i;
+            printf("Child waiting for %ds, exit_code=%d\n", sleep_time, exit_code);
+            if (sleep_time) sleep(sleep_time);
+
+            _exit(exit_code); /* We need _exit() instead of exit() to don't trigger testing_atexit() */
+        } else if (pid == -1) { /* Error */
+            errx(1, "fork (child) failed! (%s() at %s:%d)",
+                __func__, __FILE__, __LINE__);
+        }
+
+        snprintf(test_id, sizeof(test_id),
+                "[%d] kevent(EVFILT_PROC, pid=%d, NOTE_EXIT | NOTE_EXITSTATUS); sleep %d", i, pid, sleep_time);
+        printf(" -- %s\n", test_id);
+
+        printf(" -- child created (pid %d)\n", (int) pid);
+
+        kevent_add(ctx->kqfd,
+                    &kev,
+                    pid,
+                    EVFILT_PROC,
+                    EV_ADD,
+                    NOTE_EXIT | NOTE_EXITSTATUS,
+                    0, NULL);
+
+        printf(" -- tracking child (pid %d)\n", (int) pid);
+
+        /* Now that we're tracking the child, tell it to proceed. */
+        result = write(pipe_fd[1], test_id, 1);
+        if (result != 1) {
+            errx(1, "write to pipe in parent failed! (ret %zd) (%s() at %s:%d)",
+                result, __func__, __FILE__, __LINE__);
+        }
+    }
+
+    {
+        int child_exit = 0;
+        int done = 0;
+        char const *kev_str;
+
+        while (!done)
+        {
+            int ret;
+            int handled = 0;
+            struct kevent buf = { 0, };
+            struct kevent *kevp = &buf;
+            struct timespec ts = {
+                .tv_sec = 5,
+                .tv_nsec = 0
+            };
+
+            printf("~> Waiting for %lds kevent_get_timeout()\n", ts.tv_sec);
+            ret = kevent_get_timeout(kevp, ctx->kqfd, &ts);
+
+            if (ret == 0) {
+                done = 1;
+            } else if (ret < 0) {
+                if (kevp->flags & EV_ERROR) {
+                    printf("!!! EV_ERROR: 'data' is errno=%d (%s)\n", (int)kevp->data, strerror((int)kevp->data));
+                }
+            } else {
+                kev_str = kevent_to_str(kevp);
+                printf(" -- Received kevent: %s\n", kev_str);
+
+                if (kevp->fflags & (NOTE_EXIT | NOTE_EXITSTATUS)) {
+                    // TODO: Save the pids of each fork() and compare here. 
+                    ++child_exit;
+                    ++handled;
+                }
+
+                if (!handled) {
+                    errx(1, "Spurious kevent: %s", kevent_to_str(kevp));
+                }
+            }
+        }
+
+        /* Make sure all expected events were received. */
+        if (child_exit == total_childs) {
+            printf(" -- Received all expected events.\n");
+        } else {
+            errx(1, "########## Did not receive all expected events.\nchild_exit=%d",
+                    child_exit);
+        }
+    }
+}
+
+static void
 test_kevent_proc_fork_exit(struct test_context *ctx)
 {
     char test_id[64];
@@ -553,6 +671,13 @@ test_evfilt_proc(struct test_context *ctx)
     signal(SIGUSR1, sig_handler);
 
     test(kevent_proc_add_and_delete, ctx);
+
+    // NOTE_EXIT | NOTE_EXITSTATUS
+    sleep_time = 0;
+    test(kevent_proc_note_exit_exitstatus, ctx);
+
+    sleep_time = 1;
+    test(kevent_proc_note_exit_exitstatus, ctx);
 
     /*
      * The below tests are not supported on Linux (yet)
