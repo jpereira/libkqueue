@@ -133,7 +133,7 @@ test_kevent_proc_fork_exit(struct test_context *ctx)
         }
         if (sleep_time) sleep(sleep_time);
 
-        _exit(0); /* We need _exit() instead of exit() to don't trigger testing_atexit() */
+        _exit(66); /* We need _exit() instead of exit() to don't trigger testing_atexit() */
     } else if (pid == -1) { /* Error */
         errx(1, "fork (child) failed! (%s() at %s:%d)",
             __func__, __FILE__, __LINE__);
@@ -186,7 +186,7 @@ test_kevent_proc_fork_exit(struct test_context *ctx)
             struct kevent buf = { 0, };
             struct kevent *kevp = &buf;
             struct timespec ts = {
-                .tv_sec = 2,
+                .tv_sec = 3,
                 .tv_nsec = 0
             };
 
@@ -552,23 +552,23 @@ test_evfilt_proc(struct test_context *ctx)
 {
     signal(SIGUSR1, sig_handler);
 
-    test(kevent_proc_add_and_delete, ctx);
+    //test(kevent_proc_add_and_delete, ctx);
 
     sleep_time = 0;
     test(kevent_proc_fork_exit, ctx);
 
-    sleep_time = 1;
-    test(kevent_proc_fork_exit, ctx);
+    // sleep_time = 1;
+    // test(kevent_proc_fork_exit, ctx);
 
-#ifdef OSX_DEPRECATED_NOTE_TRACK
-    printf("WARNING: OSX Doesn't support 'NOTE_TRACK', so ignoring proc_track() tests\n");
-#else
-    sleep_time = 0;
-    test(kevent_proc_track, ctx);
+// #ifdef OSX_DEPRECATED_NOTE_TRACK
+//     printf("WARNING: OSX Doesn't support 'NOTE_TRACK', so ignoring proc_track() tests\n");
+// #else
+//     sleep_time = 0;
+//     test(kevent_proc_track, ctx);
 
-    sleep_time = 1;
-    test(kevent_proc_track, ctx);
-#endif
+//     sleep_time = 1;
+//     test(kevent_proc_track, ctx);
+// #endif
 
     signal(SIGUSR1, SIG_DFL);
 

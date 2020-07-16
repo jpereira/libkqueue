@@ -54,7 +54,7 @@ if(NOT "${CMAKE_SYSTEM_NAME}" MATCHES "(Darwin|FreeBSD)")
   target_link_libraries(libkqueue-test
                         PRIVATE
                         kqueue
-                        Threads::Threads)
+                        Threads::Threads dl)
 endif()
 
 if(WIN32)

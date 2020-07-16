@@ -281,23 +281,23 @@ test_harness(struct unit_test tests[MAX_TESTS], int iterations)
 
     testing_begin();
 
-    ctx = calloc(1, sizeof(*ctx));
+//     ctx = calloc(1, sizeof(*ctx));
 
-    test(peer_close_detection, ctx);
+//     test(peer_close_detection, ctx);
 
-    test(kqueue, ctx);
-    test(kevent, ctx);
+//     test(kqueue, ctx);
+//     test(kevent, ctx);
 
-#if defined(__linux__)
-    test(cleanup, ctx);
-#endif
+// #if defined(__linux__)
+//     test(cleanup, ctx);
+// #endif
 
-    test(ev_receipt, ctx);
+    //test(ev_receipt, ctx);
     /* TODO: this fails now, but would be good later
     test(kqueue_descriptor_is_pollable);
     */
 
-    free(ctx);
+    // free(ctx);
 
     if ((kqfd = kqueue()) < 0)
         die("kqueue()");
